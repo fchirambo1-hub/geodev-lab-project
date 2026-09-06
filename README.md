@@ -1,2 +1,6 @@
-# geodev-lab-project
-GIS and Automated System that takes a scanned cadastral plan as input, use OCR to read its printed coordinate schedule, validate the values, assign the correct coordinate system, and output a GeoPackage containing the plan's boundary as a polygon checked against the verified beacon coordinates for accuracy.
+# My GeoDev Lab Africa project
+
+Can OCR and rule-based parsing reliably extract coordinate schedules from scanned Mzuzu City cadastral survey plans and auto-generate GIS-ready polygon files, within the Survey Department's 0.025 m accuracy tolerance?
+
+Built over twelve months with GeoDev Lab Africa, Cohort One.
+See project-brief.md for the full brief.
