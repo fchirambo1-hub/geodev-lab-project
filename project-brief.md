@@ -49,8 +49,3 @@ known answers and, as they become available, the department's own worked example
 
 All from the Department of Surveys, Ministry of Lands (Geodetic Office), for academic use.
 None of it is publicly downloadable, and raw data is never committed to this repository.
-
-## RELATED WORK
-
-The OCR study on scanned Mzuzu cadastral plans is a separate project:
-[docs/geodev-ocr/](docs/geodev-ocr/).

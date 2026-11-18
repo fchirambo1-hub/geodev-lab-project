@@ -12,9 +12,6 @@ See [project-brief.md](project-brief.md) for the full brief.
 calculation is written first as plain, tested Python so any interface (QGIS plugin, desktop
 app, web) can use it.
 
-> The OCR study on scanned cadastral plans is a separate project. Its brief and notes are in
-> [docs/geodev-ocr/](docs/geodev-ocr/).
-
 ## Quick start
 
 ```bash
