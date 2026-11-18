@@ -1,0 +1,5 @@
+﻿pytest
+ezdxf>=1.4
+numpy
+pyproj>=3.6
+
