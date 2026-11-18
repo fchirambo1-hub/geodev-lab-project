@@ -163,6 +163,20 @@ def test_rejects_hatanaka(tmp_path):
         read_header(p)
 
 
+def test_blank_last_obs_and_week_rollover(tmp_path):
+    """Real Spectra R4S files: blank TIME OF LAST OBS line and data dated 1024 weeks early."""
+    t0 = datetime(2006, 9, 11)                       # = 2026-04-27 minus 1024 GPS weeks
+    times = [t0 + timedelta(seconds=30 * i) for i in range(10)]
+    text = v2_file(times, lambda i: gps(6))
+    import re
+    text = re.sub(r".*TIME OF LAST OBS\s*\n", H("", "TIME OF LAST OBS"), text)
+    p = tmp_path / "08941170.26o"
+    p.write_text(text)
+    assert read_header(p).last_obs is None
+    qc = quality_check(p)
+    assert any("week rollover" in w for w in qc.warnings)
+
+
 def test_warns_on_zero_antenna_height(tmp_path):
     t0 = datetime(2026, 4, 27)
     times = [t0 + timedelta(seconds=30 * i) for i in range(10)]

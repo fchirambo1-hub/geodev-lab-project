@@ -30,6 +30,9 @@ def main():
         except (RinexError, OSError) as e:
             print(f"\n{p}: SKIPPED - {e}")
             continue
+        except Exception as e:                 # unexpected format quirk: report, keep going
+            print(f"\n{p}: SKIPPED - could not read ({type(e).__name__}: {e})")
+            continue
         print("\n" + qc.report())
         h = qc.header
         rows.append({

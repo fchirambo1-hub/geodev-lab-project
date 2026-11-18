@@ -71,10 +71,14 @@ def _float(s: str, default=None):
     return float(s.replace("D", "E").replace("d", "e"))
 
 
-def _time_from_header(s: str) -> datetime:
-    y, mo, d, h, mi = (int(x) for x in s[:30].split()[:5])
-    sec = float(s[:43].split()[5])
-    return datetime(y, mo, d, h, mi) + timedelta(seconds=sec)
+def _time_from_header(s: str) -> datetime | None:
+    """Parse TIME OF FIRST/LAST OBS. Some receivers write the line blank -> None."""
+    try:
+        parts = s[:43].split()
+        y, mo, d, h, mi = (int(x) for x in parts[:5])
+        return datetime(y, mo, d, h, mi) + timedelta(seconds=float(parts[5]))
+    except (ValueError, IndexError):
+        return None
 
 
 # ------------------------------------------------------------------ header
@@ -360,6 +364,14 @@ def quality_check(path: str | Path, gap_factor: float = 2.0) -> QCResult:
         warnings.append(f"Only {completeness:.0f} % of expected epochs - check the gaps")
     if "G" in stats and stats["G"][0] < 4:
         warnings.append(f"Some epochs have fewer than 4 GPS satellites (min {stats['G'][0]})")
+    # file names like 99NY1170.26o carry the 2-digit year; a different year in the data
+    # usually means a receiver clock / GPS week-rollover problem
+    suffix = path.name.lower().removesuffix(".gz")[-3:]
+    if len(suffix) == 3 and suffix[:2].isdigit() and suffix[2] == "o":
+        yy = 2000 + int(suffix[:2])
+        if times[0].year != yy:
+            warnings.append(f"File name says {yy} but data starts {times[0]:%Y-%m-%d} - "
+                            "receiver date is wrong (GPS week rollover?) or file is misnamed")
     if hdr.last_obs and abs((hdr.last_obs - times[-1]).total_seconds()) > (interval or 1):
         warnings.append(f"Header TIME OF LAST OBS ({hdr.last_obs}) differs from the data "
                         f"({times[-1]}) - file may be truncated")

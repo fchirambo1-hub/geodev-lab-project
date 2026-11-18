@@ -4,3 +4,7 @@
 .venv/
 
 output/
+
+# raw survey data belongs to the Survey Department - never commit it
+data/gnss/*
+!data/gnss/README.txt
