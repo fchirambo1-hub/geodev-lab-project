@@ -42,7 +42,7 @@ def v2_file(times, sats_fn, n_types=8, event_after=None):
     types = ["L1", "L2", "C1", "P1", "P2", "D1", "D2", "S1"][:n_types]
     lines = [H(f"{n_types:6d}" + "".join(f"{t:>6}" for t in types), "# / TYPES OF OBSERV")]
     out = common_header(H(f"{2.11:9.2f}{'':11}{'O':<20}{'M (MIXED)':<20}",
-                          "RINEX VERSION / TYPE"), lines, last=times[-1])
+                          "RINEX VERSION / TYPE"), lines, first=times[0], last=times[-1])
     per_sat = -(-n_types // 5)
     for i, t in enumerate(times):
         sats = sats_fn(i)
@@ -68,7 +68,8 @@ def v3_file(times, sats_fn):
              H("E  16 C1C L1C D1C S1C C5Q L5Q D5Q S5Q C7Q L7Q D7Q S7Q C8Q", "SYS / # / OBS TYPES"),
              H("       L8Q D8Q S8Q", "SYS / # / OBS TYPES")]   # continuation line (16 total)
     out = common_header(H(f"{3.04:9.2f}{'':11}{'OBSERVATION DATA':<20}{'M':<20}",
-                          "RINEX VERSION / TYPE"), lines, interval=1.0, last=times[-1])
+                          "RINEX VERSION / TYPE"), lines, interval=1.0, first=times[0],
+                          last=times[-1])
     for i, t in enumerate(times):
         sats = sats_fn(i)
         out += (f"> {t.year:4d} {t.month:02d} {t.day:02d} {t.hour:02d} {t.minute:02d}"

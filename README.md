@@ -50,6 +50,7 @@ python demo.py           # see every tool working
 | Resection | `cogo.resection` (Tienstra) | ✅ |
 | Forward Resection | = intersection from angles | next |
 | Gps (data check) | `rinex.quality_check`, `rinex_qc.py` | ✅ RINEX 2/3 reader + QC |
+| Gps (date repair) | `rollover.fix_rollover`, `fix_rollover.py` | ✅ GPS week-rollover fix |
 | Coordinate Summary / Reports | `reports.py` (PDF/CSV) | Stage 6 |
 | Area Outputs | `cogo.area` | ✅ area, perimeter |
 
@@ -63,6 +64,9 @@ surveycore/   calculations only — no screens (the "backend" core)
   pointio.py  read/write point files (comma/semicolon/tab/space, header or not,
               decimal commas, Netcad Y/X or maths X/Y order - auto-detected)
   dxfexport.py DXF drawing: layers POINTS, POINT_NAMES, HEIGHTS, LINES, PARCELS
+  transform.py Arc 1950 <-> WGS 84 7-parameter Helmert, 2D similarity/affine
+  rinex.py    RINEX 2/3 observation reader and quality check
+  rollover.py GPS week-rollover date repair
 data/         sample input files
 output/       files written by demo.py (not committed)
 tests/        pytest checks — add the office's worked examples here
@@ -86,6 +90,22 @@ a missing antenna type, short sessions and truncated files.
 - Navigation files (`.26n/.26g/.26l`) are not observation files; they are skipped with a message.
 - Receiver binary files (`.dat`) must first be converted to RINEX with GeoMax software.
 - `data/SYNTHETIC_99NY1170.26o` is an invented example file.
+
+#### GPS week rollover (Spectra R4S receivers)
+
+Some receivers date their data exactly 1024 weeks (19.6 years) too early, e.g. September 2006
+instead of April 2026. PPP services reject such files. `rinex_qc.py` warns about it; fix with:
+
+```bash
+python fix_rollover.py "data/gnss/rinex_obs/*/*/*.26o" --out data/gnss/rinex_fixed
+```
+
+- Writes corrected **copies**; originals are never touched. Correct files are skipped.
+- Only the epoch dates and the header TIME OF FIRST/LAST OBS change; every measurement
+  stays byte-for-byte identical. A COMMENT line records the fix in the header.
+- The true date comes from the RINEX file name (`SSSSDDDF.YYo`); for other names pass `--cycles 1`.
+- Navigation files (`.26n/.26g`) from these receivers have the same fault, but PPP services
+  use their own precise orbits, so only the observation files matter for processing.
 
 ### Datum transformation (Arc 1950 ↔ WGS 84)
 
