@@ -36,6 +36,7 @@ python demo.py           # see every tool working
 | Ground Reduction | `reduction.py` (scale factor, height) | needs projection (Stage 2) |
 | Resection | `cogo.resection` (Tienstra) | ✅ |
 | Forward Resection | = intersection from angles | next |
+| Gps (data check) | `rinex.quality_check`, `rinex_qc.py` | ✅ RINEX 2/3 reader + QC |
 | Coordinate Summary / Reports | `reports.py` (PDF/CSV) | Stage 6 |
 | Area Outputs | `cogo.area` | ✅ area, perimeter |
 
@@ -54,6 +55,24 @@ output/       files written by demo.py (not committed)
 tests/        pytest checks — add the office's worked examples here
 demo.py       runnable examples
 ```
+
+## GNSS data check (RINEX)
+
+Check every observation file **before** sending it for processing (CSRS-PPP, AUSPOS, RTKLIB):
+
+```bash
+python rinex_qc.py data/gnss/*.26o --csv output/rinex_summary.csv
+```
+
+Reads RINEX 2.10/2.11 and 3.0x observation files (also `.gz`). Reports station, receiver,
+antenna type and height, start/end, duration, interval, completeness, gaps, satellites per
+system and the approximate position (lat/lon and UTM 36S). Warns about a zero antenna height,
+a missing antenna type, short sessions and truncated files.
+
+- Hatanaka files (`.crx`, `.26d`) must be decompressed with CRX2RNX first.
+- Navigation files (`.26n/.26g/.26l`) are not observation files; they are skipped with a message.
+- Receiver binary files (`.dat`) must first be converted to RINEX with GeoMax software.
+- `data/SYNTHETIC_99NY1170.26o` is an invented example file.
 
 ## Datum transformation (Arc 1950 ↔ WGS 84)
 
