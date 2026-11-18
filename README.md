@@ -1,22 +1,21 @@
-# My GeoDev Lab Africa project
+# Malawi Survey Software
 
-Can OCR and rule-based parsing reliably extract coordinate schedules from scanned Mzuzu City cadastral survey plans and auto-generate GIS-ready polygon files, within the Survey Department's 0.025 m accuracy tolerance?
+**Main goal: develop survey software for the Department of Surveys and the Lands Information
+Management System (LIMS) office in Malawi**: a Netcad-style system that does the everyday
+survey computations (COGO, traverses, tachymetry, datum transformations, GNSS data checks)
+and exports results to GIS and CAD.
 
-Built over twelve months with GeoDev Lab Africa, Cohort One.
-See project-brief.md for the full brief.
+BSc Land Surveying project (2026–2028), built step by step with GeoDev Lab Africa, Cohort One.
+See [project-brief.md](project-brief.md) for the full brief.
 
----
+**Status:** calculation core built and tested (63 automated tests). Screens come later; every
+calculation is written first as plain, tested Python so any interface (QGIS plugin, desktop
+app, web) can use it.
 
-The coordinate engine below does the survey maths the OCR system needs: reading
-and validating coordinates, Arc 1950 → WGS 84 / UTM 36S transformation, parcel
-areas and GIS/CAD export.
+> The OCR study on scanned cadastral plans is a separate project. Its brief and notes are in
+> [docs/geodev-ocr/](docs/geodev-ocr/).
 
-## Survey computation engine (`surveycore/`)
-
-A Netcad-style survey computation system for the Malawi Survey Department / LIMS.
-BSc Land Surveying project (2026–2028).
-
-### Quick start
+## Quick start
 
 ```bash
 python -m pip install -r requirements.txt
@@ -24,7 +23,7 @@ python -m pytest -q      # run all checks
 python demo.py           # see every tool working
 ```
 
-### Conventions
+## Conventions
 
 | Here | Netcad | Meaning |
 |---|---|---|
@@ -33,7 +32,7 @@ python demo.py           # see every tool working
 | bearing | azimuth | whole-circle, clockwise from grid north, decimal degrees |
 | `parse_dms("45.3015")` | — | field-book DDD.MMSS → 45°30'15" |
 
-### Netcad COGO tab → this project
+## Netcad COGO tab → this project
 
 | Netcad tool | Module / function | Status |
 |---|---|---|
@@ -54,7 +53,7 @@ python demo.py           # see every tool working
 | Coordinate Summary / Reports | `reports.py` (PDF/CSV) | Stage 6 |
 | Area Outputs | `cogo.area` | ✅ area, perimeter |
 
-### Structure
+## Structure
 
 ```
 surveycore/   calculations only — no screens (the "backend" core)
@@ -73,7 +72,7 @@ tests/        pytest checks — add the office's worked examples here
 demo.py       runnable examples
 ```
 
-### GNSS data check (RINEX)
+## GNSS data check (RINEX)
 
 Check every observation file **before** sending it for processing (CSRS-PPP, AUSPOS, RTKLIB):
 
@@ -91,7 +90,7 @@ a missing antenna type, short sessions and truncated files.
 - Receiver binary files (`.dat`) must first be converted to RINEX with GeoMax software.
 - `data/SYNTHETIC_99NY1170.26o` is an invented example file.
 
-#### GPS week rollover (Spectra R4S receivers)
+### GPS week rollover (Spectra R4S receivers)
 
 Some receivers date their data exactly 1024 weeks (19.6 years) too early, e.g. September 2006
 instead of April 2026. PPP services reject such files. `rinex_qc.py` warns about it; fix with:
@@ -107,7 +106,7 @@ python fix_rollover.py "data/gnss/rinex_obs/*/*/*.26o" --out data/gnss/rinex_fix
 - Navigation files (`.26n/.26g`) from these receivers have the same fault, but PPP services
   use their own precise orbits, so only the observation files matter for processing.
 
-### Datum transformation (Arc 1950 ↔ WGS 84)
+## Datum transformation (Arc 1950 ↔ WGS 84)
 
 The published Malawi shifts (EPSG:1117 and EPSG:6904) are 3-parameter and only good to
 27–29 m. Compute a local 7-parameter fit from points known in both datums:
@@ -129,7 +128,7 @@ python fit_transformation.py arc1950_points.csv wgs84_points.csv --check CP09 CP
 
 For local/assumed grids, `fit_2d(local_pts, utm_pts, "similarity" | "affine")`.
 
-### Point files
+## Point files
 
 ```python
 from surveycore.pointio import read_points
@@ -140,7 +139,7 @@ for w in res.warnings: print(w)          # always read the warnings!
 A file with no header is read in Netcad order: `name  Y(East)  X(North)  [H]  [code]`.
 In DXF, X = Easting and Y = Northing (CAD convention) — the values are the same as Netcad's Y/X.
 
-### Rules for this codebase
+## Rules for this codebase
 
 1. Calculations live in `surveycore/` and never depend on a screen.
 2. Every new function gets a test before it is used anywhere.
